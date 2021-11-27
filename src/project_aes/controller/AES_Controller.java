@@ -5,6 +5,9 @@
  */
 package project_aes.controller;
 
+import java.io.UnsupportedEncodingException;
+import javax.xml.bind.DatatypeConverter;
+
 /**
  *
  * @author ADMIN
@@ -12,26 +15,103 @@ package project_aes.controller;
 public class AES_Controller {
 
     //Số cột chứa một trạng thái trong AES
-    private final int Nb = 4;
+    private int Nb = 4;
     // Số vòng lặp trong AES Cipher
     private int Nr = 0;
     // Số khóa vòng vào từng vòng mã hóa và giải mã
     private int Nk = 0;
 
-    // Mảng lưu trữ bảng rõ đầu vào
-    private String[] input = new String[16];
-    // Mảng lưu trữ bảng mã (giải mã) đầu ra
-    private String[] output = new String[16];
     // Mảng lưu trữ các kết quả biến đổi bên trong
-    private String[][] state = new String[4][4];
-
-    // Mảng lưu trữ các khóa vòng
-    private String[] roundKey = new String[240];
+    private int[] state;
 
     // Khóa đầu vào cho chương trình
-    private String[] key = new String[32];
-    
-    public String getSBoxValue(String num) {
+    private int[] key = new int[32];
+
+    // Số kí tự thêm vào chuỗi đầu vào
+    private int addInput = 0;
+
+    //Hiển thị một dãy gồm 4 số hexa, mỗi số đủ 2 byte => tổng là 8 byte
+    public void showHexaNumber(int w) {
+        int i, byteAtI;
+        for (i = 1; i <= 8; i++) {
+            byteAtI = (w >> 32 - i * 4) & 0xF;
+            System.out.printf("%x", byteAtI);
+        }
+    }
+
+    //====================================================================================================================================================================
+    // KIỂM TRA VÀ BIẾN ĐỔI CÁC THAM SỐ ĐẦU VÀO
+    // Biến đổi chuỗi đầu vào thành một mảng hexa
+    public int[] formatToHexaMatrix(String hexaString) throws UnsupportedEncodingException {
+        int resultLength = hexaString.length() / 8;
+        int[] result = new int[resultLength];
+        int temp1, temp2;
+        for (int i = 0; i < resultLength; i++) {
+            temp1 = Integer.valueOf(hexaString.substring(i * 8, i * 8 + 4), 16);
+            temp2 = Integer.valueOf(hexaString.substring(i * 8 + 4, i * 8 + 8), 16);
+            result[i] = (temp1 << 16) | temp2;
+        }
+        return result;
+    }
+
+    // Biến đổi chuỗi đầu vào thành mảng State
+    public void formatInput(String input) throws UnsupportedEncodingException {
+        byte[] myBytes = input.getBytes("UTF-8");
+        String hexaString = DatatypeConverter.printHexBinary(myBytes);
+        while (hexaString.length() % 32 != 0) {
+            hexaString += 0;
+            addInput++;
+        }
+        System.out.println(hexaString);
+        System.out.println(hexaString.length());
+        this.state = formatToHexaMatrix(hexaString);
+        System.out.println(state.length);
+
+        
+    }
+
+    // Kiểm tra độ dài khóa
+    public boolean checkKeyLength(String key) {
+        switch (key.length()) {
+            case 16:
+                Nk = 4;
+                Nr = 10;
+                break;
+            case 24:
+                Nk = 6;
+                Nr = 12;
+                break;
+            case 32:
+                Nk = 8;
+                Nr = 14;
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    // Biến đổi khóa thành mảng
+    public void formatkey(String key) throws UnsupportedEncodingException {
+        if (checkKeyLength(key)) {
+            byte[] myBytes = key.getBytes("UTF-8");
+            String hexaString = DatatypeConverter.printHexBinary(myBytes);
+            this.key = formatToHexaMatrix(hexaString);
+        }
+    }
+
+    //====================================================================================================================================================================
+    // GIẢI THUẬT SINH KHÓA
+    // Bước 1: Rotword - Quay trái 1 byte (8 bit)
+    public int rotword(int w) {
+        int byte1 = (w >> 24) & 0xFF;
+        int byte234 = w & 0xFFFFFF;
+        int rot = (byte234 << 8) | byte1;
+        return rot;
+    }
+
+    // Bước 2: subBytes - Đổi giá trị byte tương ứng thành giá trị trong bảng Sbox
+    public int subWord(int w) {
         int sBox[] = {
             0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
             0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
@@ -50,195 +130,168 @@ public class AES_Controller {
             0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF,
             0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16
         };
-        return Integer.toHexString(sBox[Integer.valueOf(num, 16)]);
+        int i, byteAtI, subByteAtI;
+        int result = 0;
+        for (i = 1; i <= Nb; i++) {
+            byteAtI = (w >> (32 - i * 8)) & 0xFF;
+            subByteAtI = sBox[byteAtI];
+            result = (result << 8) | subByteAtI;
+        }
+        return result;
     }
 
-    public String getSBoxInvertValue(String num) {
-        int sBoxInvert[] = {
-            0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
-            0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
-            0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e,
-            0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b, 0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25,
-            0x72, 0xf8, 0xf6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xd4, 0xa4, 0x5c, 0xcc, 0x5d, 0x65, 0xb6, 0x92,
-            0x6c, 0x70, 0x48, 0x50, 0xfd, 0xed, 0xb9, 0xda, 0x5e, 0x15, 0x46, 0x57, 0xa7, 0x8d, 0x9d, 0x84,
-            0x90, 0xd8, 0xab, 0x00, 0x8c, 0xbc, 0xd3, 0x0a, 0xf7, 0xe4, 0x58, 0x05, 0xb8, 0xb3, 0x45, 0x06,
-            0xd0, 0x2c, 0x1e, 0x8f, 0xca, 0x3f, 0x0f, 0x02, 0xc1, 0xaf, 0xbd, 0x03, 0x01, 0x13, 0x8a, 0x6b,
-            0x3a, 0x91, 0x11, 0x41, 0x4f, 0x67, 0xdc, 0xea, 0x97, 0xf2, 0xcf, 0xce, 0xf0, 0xb4, 0xe6, 0x73,
-            0x96, 0xac, 0x74, 0x22, 0xe7, 0xad, 0x35, 0x85, 0xe2, 0xf9, 0x37, 0xe8, 0x1c, 0x75, 0xdf, 0x6e,
-            0x47, 0xf1, 0x1a, 0x71, 0x1d, 0x29, 0xc5, 0x89, 0x6f, 0xb7, 0x62, 0x0e, 0xaa, 0x18, 0xbe, 0x1b,
-            0xfc, 0x56, 0x3e, 0x4b, 0xc6, 0xd2, 0x79, 0x20, 0x9a, 0xdb, 0xc0, 0xfe, 0x78, 0xcd, 0x5a, 0xf4,
-            0x1f, 0xdd, 0xa8, 0x33, 0x88, 0x07, 0xc7, 0x31, 0xb1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xec, 0x5f,
-            0x60, 0x51, 0x7f, 0xa9, 0x19, 0xb5, 0x4a, 0x0d, 0x2d, 0xe5, 0x7a, 0x9f, 0x93, 0xc9, 0x9c, 0xef,
-            0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61,
-            0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
+    // Bước 3: Rcon - Tính giá trị Rcon thứ i
+    public int xorRcon(int w, int i) {
+        int rcon[] = {
+            0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
+            0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97,
+            0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39
         };
-        return Integer.toHexString(sBoxInvert[Integer.valueOf(num, 16)]);
+        int byte1 = (w >> 24) & 0xFF;
+        int byte234 = w & 0xFFFFFF;
+        int resultXor = (byte1 ^ rcon[i]) & 0xFF;
+        int result = (resultXor << 24) | byte234;
+        return result;
     }
 
-    int rcon[] = {
-        0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
-        0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97,
-        0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72,
-        0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66,
-        0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04,
-        0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d,
-        0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3,
-        0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61,
-        0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a,
-        0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40,
-        0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc,
-        0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5,
-        0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a,
-        0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d,
-        0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c,
-        0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35,
-        0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4,
-        0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc,
-        0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04, 0x08,
-        0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a,
-        0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d,
-        0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2,
-        0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74,
-        0xe8, 0xcb
-    };
-
-    public void keyExpansion() {
-        int i, j;
-        String k;
-        String temp[] = new String[4];
+    // Hàm sinh khóa
+    public int[] keyExpansion(int[] key) {
+        int i;
+        int temp = 0;
+        int[] w = new int[Nb * (Nr + 1)];
 
         for (i = 0; i < Nk; i++) {
-            roundKey[i * 4] = key[i * 4];
-            roundKey[i * 4 + 1] = key[i * 4 + 1];
-            roundKey[i * 4 + 2] = key[i * 4 + 2];
-            roundKey[i * 4 + 3] = key[i * 4 + 3];
+            w[i] = key[i];
         }
 
-        while (i < (Nb * (Nr + 1))) {
-            for (j = 0; j < 4; j++) {
-                temp[j] = roundKey[(i - 1) * 4 + j];
+        for (i = Nk; i < Nb * (Nr + 1); i++) {
+            temp = w[i - 1];
+            if (i % Nk == 0) {
+                temp = rotword(temp);
+                temp = subWord(temp);
+                temp = xorRcon(temp, i / Nk);
+            } else if (Nk > 6 && i % Nk == 4) {
+                temp = subWord(temp);
             }
-            if (i % Nk == 0) {    // Key là 128
-                //Hàm rotWord()
-                k = temp[0];
-                temp[1] = temp[0];
-                temp[2] = temp[1];
-                temp[3] = k;
-                // Hàm subBytes()
-                temp[0] = getSBoxValue(temp[0]);
-                temp[1] = getSBoxValue(temp[1]);
-                temp[2] = getSBoxValue(temp[2]);
-                temp[3] = getSBoxValue(temp[3]);
-
-                temp[0] = Integer.toHexString(Integer.valueOf(temp[0], 16) ^ rcon[i / Nk]);
-            } else if (Nk > 6 && i % Nk == 4) {    // Key là 192
-                temp[0] = getSBoxValue(temp[0]);
-                temp[1] = getSBoxValue(temp[1]);
-                temp[2] = getSBoxValue(temp[2]);
-                temp[3] = getSBoxValue(temp[3]);
-            }
-            roundKey[i * 4 + 0] = Integer.toHexString(Integer.valueOf(roundKey[(i - Nk) * 4 + 0]) ^ Integer.valueOf(temp[0]));
-            roundKey[i * 4 + 1] = Integer.toHexString(Integer.valueOf(roundKey[(i - Nk) * 4 + 1]) ^ Integer.valueOf(temp[1]));
-            roundKey[i * 4 + 2] = Integer.toHexString(Integer.valueOf(roundKey[(i - Nk) * 4 + 2]) ^ Integer.valueOf(temp[2]));
-            roundKey[i * 4 + 3] = Integer.toHexString(Integer.valueOf(roundKey[(i - Nk) * 4 + 3]) ^ Integer.valueOf(temp[3]));
-            i++;
+            w[i] = w[i - Nk] ^ temp;
         }
+        return w;
     }
 
-    public void addRoundKey(int round) {
-        int i, j;
+    //====================================================================================================================================================================
+    // MÃ HÓA
+    // Bước 1: AddRoundKey
+    public int[] addRoundKey(int[] state, int[] key) {
+        int[] result = new int[4];
+        result[0] = state[0] ^ key[0];
+        result[1] = state[1] ^ key[1];
+        result[2] = state[2] ^ key[2];
+        result[3] = state[3] ^ key[3];
+        return result;
+    }
+
+    // Bước 2: SubBytes
+    public int[] subBytes(int[] state) {
+        int i;
+        int[] result = new int[4];
         for (i = 0; i < 4; i++) {
-            for (j = 0; j < 4; j++) {
-                state[i][j] = Integer.toHexString(Integer.valueOf(roundKey[round * Nb * 4 + i * Nb + j]) ^ Integer.valueOf(state[i][j]));
-            }
+            result[i] = subWord(state[i]);
+        }
+        return result;
+    }
+
+    // Bước 3: ShiftRow
+    public int[] shiftrow(int[] state) {
+        int i;
+        int[] result = new int[4];
+        for (i = 0; i < 4; i++) {
+            int byte1 = state[i] & 0xFF000000;
+            int byte2 = state[(i + 1) % 4] & 0xFF0000;
+            int byte3 = state[(i + 2) % 4] & 0xFF00;
+            int byte4 = state[(i + 3) % 4] & 0xFF;
+            result[i] = byte1 | byte2 | byte3 | byte4;
+        }
+        return result;
+    }
+
+    // Bước 4: MixCollumn
+    // Hàm nhân 2 với byte
+    public int nhan2(int w) {
+        int result = w << 1;
+        if (result > 256) {
+            result = result ^ 0x11b;
+        }
+        return result & 0xFF;
+    }
+
+    // Hàm nhân 3 với byte
+    public int nhan3(int w) {
+        int result = w ^ nhan2(w);
+        return result & 0xFF;
+    }
+
+    // Hàm nhân dùng cho từng cột
+    public int multipleCollumn(int w) {
+        int byte1 = (w >> 24) & 0xFF;
+        int byte2 = (w >> 16) & 0xFF;
+        int byte3 = (w >> 8) & 0xFF;
+        int byte4 = w & 0xFF;
+
+        int result1 = nhan2(byte1) ^ nhan3(byte2) ^ byte3 ^ byte4;
+        int result2 = byte1 ^ nhan2(byte2) ^ nhan3(byte3) ^ byte4;
+        int result3 = byte1 ^ byte2 ^ nhan2(byte3) ^ nhan3(byte4);
+        int result4 = nhan3(byte1) ^ byte2 ^ byte3 ^ nhan2(byte4);
+
+        return (result1 << 24) | (result2 << 16) | (result3 << 8) | result4;
+    }
+
+    // Hàm mixCollumn cho ra kết quả cuối cùng là 4 cột
+    public int[] mixCollumn(int[] state) {
+        int i;
+        int[] result = new int[4];
+        for (i = 0; i < 4; i++) {
+            result[i] = multipleCollumn(state[i]);
+        }
+        return result;
+    }
+
+    public void showMatrix(int[] w) {
+        for (int i = 0; i < w.length; i++) {
+            showHexaNumber(w[i]);
+            System.out.println("");
         }
     }
 
-    public void subBytes() {
-        int i, j;
-        for (i = 0; i < 4; i++) {
-            for (j = 0; j < 4; j++) {
-                state[i][j] = getSBoxValue(state[i][j]);
-            }
+    public int[] getKey(int[] key, int i) {
+        int j;
+        int[] w = keyExpansion(key);
+        int[] result = new int[4];
+        for (j = 0; j < 4; j++) {
+            result[j] = w[i * 4 + j];
         }
+        return result;
     }
-    
-    public void shiftRows() {
-        String temp;
-        
-        // Quay hàng đầu tiên 1 cột sang trái
-        temp = state[1][0];
-        state[1][0] = state[1][1];
-        state[1][1] = state[1][2];
-        state[1][2] = state[1][3];
-        state[1][3] = temp;
-        
-        // Quay hàng thứ hai 2 cột sang trái
-        temp = state[2][0];
-        state[2][0] = state[2][2];
-        state[2][2] = temp;
-        
-        temp = state[2][1];
-        state[2][1] = state[2][3];
-        state[2][3] = temp;
-        
-        // Quay hàng thứ ba 3 cột sang trái
-        temp = state[3][0];
-        state[3][0] = state[3][3];
-        state[3][3] = state[3][2];
-        state[3][2] = state[3][1];
-        state[3][1] = temp;
-    }
-    
-    
-    public void ModifiedSubByte(int round) {
-        int i, j;
-        for (i = 0; i < 2; i++) {
-            String[] tempkey = new String[8];
-            for (j = 0; j < 4; j++) {
-                tempkey[j * 2] = roundKey[round];
-            }
+
+    public int[] EncrptionAES() {
+        for (int i = 0; i < state.length; i++) {
+            System.out.println(Integer.toHexString(state[i]));
         }
-    }
-    
-    public void invSubBytes() {
-        int i, j;
-        for (i = 0; i < 4; i++) {
-            for (j = 0; j < 4; j++) {
-                state[i][j] = getSBoxInvertValue(state[i][j]);
-            }
+        // Vòng đầu tiên
+        state = addRoundKey(state, getKey(key, 0));
+        // Vòng thứ 1 đến thứ 9
+        int i;
+        for (i = 1; i <= Nr - 1; i++) {
+            state = subBytes(state);
+            state = shiftrow(state);
+            state = mixCollumn(state);
+            state = addRoundKey(state, getKey(key, i));
         }
-    }
-    
-    
-    public void invShiftRows() {
-        String temp;
-        
-        // Quay hàng đầu tiên 1 cột sang phải
-        temp = state[1][3];
-        state[1][3] = state[1][2];
-        state[1][2] = state[1][1];
-        state[1][1] = state[1][0];
-        state[1][0] = temp;
-        
-        // Quay hàng thứ hai 2 cột sang phải
-        temp = state[2][0];
-        state[2][0] = state[2][2];
-        state[2][2] = temp;
-        
-        temp = state[2][1];
-        state[2][1] = state[2][3];
-        state[2][3] = temp;
-        
-        // Quay hàng thứ ba 3 cột sang phải
-        temp = state[3][0];
-        state[3][0] = state[3][1];
-        state[3][1] = state[3][2];
-        state[3][2] = state[3][3];
-        state[3][3] = temp;
-    }
-    
-    public int xtime(int x) {
-        return (x<<1) ^ (((x>>7) & 1) * 0x1b);
+        // Vòng thứ 10
+        state = subBytes(state);
+        state = shiftrow(state);
+        state = addRoundKey(state, getKey(key, Nr));
+        System.out.println("");
+        showMatrix(state);
+        return state;
     }
 }
