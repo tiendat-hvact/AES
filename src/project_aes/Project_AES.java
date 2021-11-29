@@ -28,13 +28,30 @@ public class Project_AES {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws UnsupportedEncodingException {
+         //key
+        int w0 = 0x2b7e1516;
+        int w1 = 0x28aed2a6;
+        int w2 = 0xabf71588;
+        int w3 = 0x09cf4f3c;
+        int key[] = {w0, w1, w2, w3};
+
+        //input
+        int[] state = new int[4];
+        state[0] = 0x3243f6a8;
+        state[1] = 0x885a308d;
+        state[2] = 0x313198a2;
+        state[3] = 0xe0370734;
+        
         AES_Controller controller = new AES_Controller();
-        String input = "Nguyễn Tiến";
-        controller.formatInput(input);
-        String key = "0123456789101112";
-        controller.checkKeyLength(key);
-        controller.formatkey(key);
-        controller.EncrptionAES();
+        int[] EncrptionAES = controller.EncrptionAES(state, key);
+        controller.decryptionAES(EncrptionAES, key);
+//        String input = "Phạm Văn Tài";
+//        controller.formatInput(input);
+//        String key = "12345678912345678912345678912345";
+//        controller.checkKeyLength(key);
+//        controller.formatkey(key);
+//        System.out.println(controller.encrptionAES());
+
     }
 
 }

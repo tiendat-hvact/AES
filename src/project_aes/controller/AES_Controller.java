@@ -17,12 +17,18 @@ public class AES_Controller {
     //Số cột chứa một trạng thái trong AES
     private int Nb = 4;
     // Số vòng lặp trong AES Cipher
-    private int Nr = 0;
+    private int Nr = 10;
     // Số khóa vòng vào từng vòng mã hóa và giải mã
-    private int Nk = 0;
+    private int Nk = 4;
+
+    // Mảng lưu trữ đầu vào
+    private int[] input;
+
+    // Mảng lưu trữ đầu ra
+    private String output = "";
 
     // Mảng lưu trữ các kết quả biến đổi bên trong
-    private int[] state;
+    private int[] state = new int[4];
 
     // Khóa đầu vào cho chương trình
     private int[] key = new int[32];
@@ -62,12 +68,12 @@ public class AES_Controller {
             hexaString += 0;
             addInput++;
         }
+        System.out.println(input);
         System.out.println(hexaString);
         System.out.println(hexaString.length());
-        this.state = formatToHexaMatrix(hexaString);
-        System.out.println(state.length);
+        this.input = formatToHexaMatrix(hexaString);
+        System.out.println(input.length());
 
-        
     }
 
     // Kiểm tra độ dài khóa
@@ -97,6 +103,8 @@ public class AES_Controller {
             byte[] myBytes = key.getBytes("UTF-8");
             String hexaString = DatatypeConverter.printHexBinary(myBytes);
             this.key = formatToHexaMatrix(hexaString);
+        } else {
+            System.out.println("Độ dài key nhập vào không hợp lệ !");
         }
     }
 
@@ -272,15 +280,40 @@ public class AES_Controller {
         return result;
     }
 
-    public int[] EncrptionAES() {
-        for (int i = 0; i < state.length; i++) {
-            System.out.println(Integer.toHexString(state[i]));
-        }
+//    public int[] encrptionAES(int[] state, int[] key) {
+//        int i, j;
+//        for (i = 0; i < input.length; i++) {
+//            System.out.println(Integer.toHexString(input[i]));
+//        }
+//
+//        for (i = 0; i < input.length; i += 4) {
+//            state[0] = input[i];
+//            state[1] = input[i + 1];
+//            state[2] = input[i + 2];
+//            state[3] = input[i + 3];
+//
+//            state = addRoundKey(state, getKey(key, 0));
+//            for (j = 1; j <= Nr - 1; j++) {
+//                state = subBytes(state);
+//                state = shiftrow(state);
+//                state = mixCollumn(state);
+//                state = addRoundKey(state, getKey(key, j));
+//            }
+//            state = subBytes(state);
+//            state = shiftrow(state);
+//            state = addRoundKey(state, getKey(key, Nr));
+//            for (j = 0; j < 4; j++) {
+//                this.output += Integer.toHexString(state[j]) + " ";
+//            }
+//        }
+//        return output;
+//    }
+    public int[] EncrptionAES(int[] state, int[] key) {
         // Vòng đầu tiên
         state = addRoundKey(state, getKey(key, 0));
         // Vòng thứ 1 đến thứ 9
         int i;
-        for (i = 1; i <= Nr - 1; i++) {
+        for (i = 1; i <= 9; i++) {
             state = subBytes(state);
             state = shiftrow(state);
             state = mixCollumn(state);
@@ -289,7 +322,169 @@ public class AES_Controller {
         // Vòng thứ 10
         state = subBytes(state);
         state = shiftrow(state);
-        state = addRoundKey(state, getKey(key, Nr));
+        state = addRoundKey(state, getKey(key, 10));
+        System.out.println("");
+        showMatrix(state);
+        return state;
+    }
+
+    //====================================================================================================================================================================
+    // GIẢI MÃ
+    // Bước 1: Invert ShiftRow
+    public int[] invertShiftrow(int[] state) {
+        int i;
+        int[] result = new int[4];
+        for (i = 0; i < 4; i++) {
+            int byte1 = state[i] & 0xFF000000;
+            int byte2 = state[(i + 3) % 4] & 0xFF0000;
+            int byte3 = state[(i + 2) % 4] & 0xFF00;
+            int byte4 = state[(i + 1) % 4] & 0xFF;
+            result[i] = byte1 | byte2 | byte3 | byte4;
+        }
+        return result;
+    }
+
+    // Bước 2: Invert SubBytes
+    public int invertSubWord(int w) {
+        int invSbox[] = {
+            0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
+            0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
+            0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e,
+            0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b, 0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25,
+            0x72, 0xf8, 0xf6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xd4, 0xa4, 0x5c, 0xcc, 0x5d, 0x65, 0xb6, 0x92,
+            0x6c, 0x70, 0x48, 0x50, 0xfd, 0xed, 0xb9, 0xda, 0x5e, 0x15, 0x46, 0x57, 0xa7, 0x8d, 0x9d, 0x84,
+            0x90, 0xd8, 0xab, 0x00, 0x8c, 0xbc, 0xd3, 0x0a, 0xf7, 0xe4, 0x58, 0x05, 0xb8, 0xb3, 0x45, 0x06,
+            0xd0, 0x2c, 0x1e, 0x8f, 0xca, 0x3f, 0x0f, 0x02, 0xc1, 0xaf, 0xbd, 0x03, 0x01, 0x13, 0x8a, 0x6b,
+            0x3a, 0x91, 0x11, 0x41, 0x4f, 0x67, 0xdc, 0xea, 0x97, 0xf2, 0xcf, 0xce, 0xf0, 0xb4, 0xe6, 0x73,
+            0x96, 0xac, 0x74, 0x22, 0xe7, 0xad, 0x35, 0x85, 0xe2, 0xf9, 0x37, 0xe8, 0x1c, 0x75, 0xdf, 0x6e,
+            0x47, 0xf1, 0x1a, 0x71, 0x1d, 0x29, 0xc5, 0x89, 0x6f, 0xb7, 0x62, 0x0e, 0xaa, 0x18, 0xbe, 0x1b,
+            0xfc, 0x56, 0x3e, 0x4b, 0xc6, 0xd2, 0x79, 0x20, 0x9a, 0xdb, 0xc0, 0xfe, 0x78, 0xcd, 0x5a, 0xf4,
+            0x1f, 0xdd, 0xa8, 0x33, 0x88, 0x07, 0xc7, 0x31, 0xb1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xec, 0x5f,
+            0x60, 0x51, 0x7f, 0xa9, 0x19, 0xb5, 0x4a, 0x0d, 0x2d, 0xe5, 0x7a, 0x9f, 0x93, 0xc9, 0x9c, 0xef,
+            0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61,
+            0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
+        };
+        int i, byteAtI, subByteAtI;
+        int result = 0;
+        for (i = 1; i <= Nb; i++) {
+            byteAtI = (w >> (32 - i * 8)) & 0xFF;
+            subByteAtI = invSbox[byteAtI];
+            result = (result << 8) | subByteAtI;
+        }
+        return result;
+    }
+
+    public int[] invertSubBytes(int[] state) {
+        int i;
+        int[] result = new int[4];
+        for (i = 0; i < 4; i++) {
+            result[i] = invertSubWord(state[i]);
+        }
+        return result;
+    }
+
+    public int nhan9(int w) {
+        int result = (w << 3) ^ w;
+        if (result > (256 << 2)) {
+            result = result ^ (0x11b << 2);
+        }
+        if (result > (256 << 1)) {
+            result = result ^ (0x11b << 1);
+        }
+        if (result > 256) {
+            result = result ^ 0x11b;
+        }
+        return result & 0xFF;
+    }
+
+    public int nhanB(int w) {
+        int result = (w << 3) ^ (w << 1) ^ w;
+        if (result > (256 << 2)) {
+            result = result ^ (0x11b << 2);
+        }
+        if (result > (256 << 1)) {
+            result = result ^ (0x11b << 1);
+        }
+        if (result > 256) {
+            result = result ^ 0x11b;
+        }
+        return result & 0xFF;
+    }
+
+    public int nhanD(int w) {
+        int result = (w << 3) ^ (w << 2) ^ w;
+        if (result >= (256 << 2)) {
+            result = result ^ (0x11b << 2);
+        }
+        if (result >= (256 << 1)) {
+            result = result ^ (0x11b << 1);
+        }
+        if (result >= 256) {
+            result = result ^ 0x11b;
+        }
+        return result & 0xFF;
+    }
+
+    public int nhanE(int w) {
+        int result = (w << 3) ^ (w << 2) ^ (w << 1);
+        if (result >= (256 << 2)) {
+            result = result ^ (0x11b << 2);
+        }
+        if (result >= (256 << 1)) {
+            result = result ^ (0x11b << 1);
+        }
+        if (result >= 256) {
+            result = result ^ 0x11b;
+        }
+        return result & 0xFF;
+    }
+
+    public int invertMultipleCollumn(int w) {
+        int byte1 = (w >> 24) & 0xFF;
+        int byte2 = (w >> 16) & 0xFF;
+        int byte3 = (w >> 8) & 0xFF;
+        int byte4 = w & 0xFF;
+
+        int result1 = nhanE(byte1) ^ nhanB(byte2) ^ nhanD(byte3) ^ nhan9(byte4);
+        int result2 = nhan9(byte1) ^ nhanE(byte2) ^ nhanB(byte3) ^ nhanD(byte4);
+        int result3 = nhanD(byte1) ^ nhan9(byte2) ^ nhanE(byte3) ^ nhanB(byte4);
+        int result4 = nhanB(byte1) ^ nhanD(byte2) ^ nhan9(byte3) ^ nhanE(byte4);
+
+        return (result1 << 24) | (result2 << 16) | (result3 << 8) | result4;
+    }
+
+    public int[] invertMixCollumn(int[] state) {
+        int i;
+        int[] result = new int[4];
+        for (i = 0; i < 4; i++) {
+            result[i] = invertMultipleCollumn(state[i]);
+        }
+        return result;
+    }
+
+    public int[] invertGetKey(int[] key, int i) {
+        int j;
+        int[] w = keyExpansion(key);
+        int[] result = new int[4];
+        for (j = 0; j < 4; j++) {
+            result[j] = w[w.length - (4 * (i + 1)) + j];
+        }
+        return result;
+    }
+
+    public int[] decryptionAES(int[] input, int[] key) {
+        int[] w = keyExpansion(key);
+        int[] state = addRoundKey(input, invertGetKey(w, 0));
+        int i;
+        for (i = 1; i <= 9; i++) {
+            state = invertShiftrow(state);
+            state = invertSubBytes(state);
+            state = addRoundKey(state, invertGetKey(key, i));
+            state = invertMixCollumn(state);
+        }
+        state = invertShiftrow(state);
+        state = invertSubBytes(state);
+        state = addRoundKey(state, invertGetKey(key, 10));
         System.out.println("");
         showMatrix(state);
         return state;
