@@ -5,6 +5,12 @@
  */
 package project_aes.view;
 
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import project_aes.controller.AES_Controller;
+
 /**
  *
  * @author ADMIN
@@ -14,8 +20,11 @@ public class AES_Form extends javax.swing.JFrame {
     /**
      * Creates new form AES_Form
      */
+    private final AES_Controller aesc;
+
     public AES_Form() {
         initComponents();
+        this.aesc = new AES_Controller();
         this.setTitle("AES Encryption");
         this.setLocationRelativeTo(null);
     }
@@ -41,6 +50,14 @@ public class AES_Form extends javax.swing.JFrame {
         decrytedTxtArea = new javax.swing.JTextArea();
         decrytedBtn = new javax.swing.JButton();
         encrytedBtn = new javax.swing.JButton();
+        keyTypeCbx = new javax.swing.JComboBox<>();
+        decTypeCbx = new javax.swing.JComboBox<>();
+        encTypeCbx = new javax.swing.JComboBox<>();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
 
         jLabel2.setText("jLabel2");
 
@@ -67,74 +84,148 @@ public class AES_Form extends javax.swing.JFrame {
         decrytedTxtArea.setRows(5);
         jScrollPane2.setViewportView(decrytedTxtArea);
 
-        decrytedBtn.setText("<< Decrypted");
+        decrytedBtn.setAlignmentY(0.0F);
+        decrytedBtn.setLabel("Decrypted");
         decrytedBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 decrytedBtnActionPerformed(evt);
             }
         });
 
-        encrytedBtn.setText("Encrypted >>");
+        encrytedBtn.setText("Encrypted");
         encrytedBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 encrytedBtnActionPerformed(evt);
             }
         });
 
+        keyTypeCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "128 bits", "192 bits", "256 bits" }));
+
+        decTypeCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Hexa", "UTF-8" }));
+
+        encTypeCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "UTF-8", "Hexa" }));
+
+        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel3.setText("MÃ HÓA AES - ADVANCED ENCRYPTION STANDARD");
+
+        jLabel4.setText("Yêu cầu cần nhập đúng độ dài khóa ứng với từng loại khóa:");
+
+        jLabel6.setText("Khóa 128 bits - 16 ký tự");
+
+        jLabel7.setText("Khóa 192 bits - 24 ký tự");
+
+        jLabel8.setText("Khóa 256 bits - 32 ký tự");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(18, 18, 18)
-                        .addComponent(keyTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(50, 50, 50)
+                        .addComponent(jLabel3))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addGap(30, 30, 30)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(decrytedBtn)
-                            .addComponent(encrytedBtn))
-                        .addGap(18, 18, 18)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLabel8)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(18, 18, 18)
+                                .addComponent(keyTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 362, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(keyTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel6)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel7))
+                                .addComponent(jLabel4))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(encTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(encrytedBtn))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                    .addComponent(decTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(decrytedBtn))
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 514, Short.MAX_VALUE)
+                                .addComponent(jScrollPane2)))))
                 .addContainerGap(30, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(30, 30, 30)
+                .addComponent(jLabel3)
+                .addGap(30, 30, 30)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel8)
+                .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(keyTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(encrytedBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(decrytedBtn)))
-                .addContainerGap(20, Short.MAX_VALUE))
+                    .addComponent(keyTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(keyTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(29, 29, 29)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(encTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(encrytedBtn))
+                .addGap(0, 0, 0)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(30, 30, 30)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(decrytedBtn)
+                    .addComponent(decTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, 0)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(30, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void encrytedBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encrytedBtnActionPerformed
-        // TODO add your handling code here:
+        if (this.aesc.checkKeyLength(keyTxt.getText(), keyTypeCbx.getSelectedItem().toString())) {
+            try {
+                this.aesc.formatkey(keyTxt.getText());
+                this.aesc.formatInput(encrytedTxtArea.getText(), encTypeCbx.getSelectedItem().toString());
+                this.aesc.encrptionAES();
+                String formatOutput = this.aesc.formatOutput(decTypeCbx.getSelectedItem().toString(), false);
+                decrytedTxtArea.setText(formatOutput.toUpperCase());
+            } catch (UnsupportedEncodingException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Độ dài khóa nhập vào không hợp lệ", "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_encrytedBtnActionPerformed
 
     private void decrytedBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decrytedBtnActionPerformed
-        // TODO add your handling code here:
+        if (this.aesc.checkKeyLength(keyTxt.getText(), keyTypeCbx.getSelectedItem().toString())) {
+            try {
+                this.aesc.formatkey(keyTxt.getText());
+                this.aesc.formatInput(decrytedTxtArea.getText(), decTypeCbx.getSelectedItem().toString());
+                this.aesc.decryptionAES();
+                String formatOutput = this.aesc.formatOutput(encTypeCbx.getSelectedItem().toString(), true);
+                encrytedTxtArea.setText(formatOutput);
+            } catch (UnsupportedEncodingException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Độ dài khóa nhập vào không hợp lệ", "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_decrytedBtnActionPerformed
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main() {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -159,25 +250,31 @@ public class AES_Form extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new AES_Form().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new AES_Form().setVisible(true);
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> decTypeCbx;
     private javax.swing.JButton decrytedBtn;
     private javax.swing.JTextArea decrytedTxtArea;
+    private javax.swing.JComboBox<String> encTypeCbx;
     private javax.swing.JButton encrytedBtn;
     private javax.swing.JTextArea encrytedTxtArea;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTextArea jTextArea3;
     private javax.swing.JTextField keyTxt;
+    private javax.swing.JComboBox<String> keyTypeCbx;
     // End of variables declaration//GEN-END:variables
 }

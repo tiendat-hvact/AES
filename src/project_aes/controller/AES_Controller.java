@@ -6,6 +6,7 @@
 package project_aes.controller;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import javax.xml.bind.DatatypeConverter;
 
 /**
@@ -24,8 +25,11 @@ public class AES_Controller {
     // Mảng lưu trữ đầu vào
     private int[] input;
 
-    // Mảng lưu trữ đầu ra
-    private String output = "";
+    // Độ dài chuỗi đầu vào
+    private int inputLength;
+
+    // Kết quả đầu ra
+    private String output;
 
     // Mảng lưu trữ các kết quả biến đổi bên trong
     private int[] state = new int[4];
@@ -33,79 +37,112 @@ public class AES_Controller {
     // Khóa đầu vào cho chương trình
     private int[] key = new int[32];
 
-    // Số kí tự thêm vào chuỗi đầu vào
-    private int addInput = 0;
-
-    //Hiển thị một dãy gồm 4 số hexa, mỗi số đủ 2 byte => tổng là 8 byte
-    public void showHexaNumber(int w) {
+    //Hiển thị dãy số Hexa
+    public String showHexaNumber(int w) {
         int i, byteAtI;
+        String result = "";
         for (i = 1; i <= 8; i++) {
             byteAtI = (w >> 32 - i * 4) & 0xF;
-            System.out.printf("%x", byteAtI);
-        }
-    }
-
-    //====================================================================================================================================================================
-    // KIỂM TRA VÀ BIẾN ĐỔI CÁC THAM SỐ ĐẦU VÀO
-    // Biến đổi chuỗi đầu vào thành một mảng hexa
-    public int[] formatToHexaMatrix(String hexaString) throws UnsupportedEncodingException {
-        int resultLength = hexaString.length() / 8;
-        int[] result = new int[resultLength];
-        int temp1, temp2;
-        for (int i = 0; i < resultLength; i++) {
-            temp1 = Integer.valueOf(hexaString.substring(i * 8, i * 8 + 4), 16);
-            temp2 = Integer.valueOf(hexaString.substring(i * 8 + 4, i * 8 + 8), 16);
-            result[i] = (temp1 << 16) | temp2;
+            result += Integer.toHexString(byteAtI);
+            if (i % 2 == 0) {
+                result += " ";
+            }
         }
         return result;
     }
 
-    // Biến đổi chuỗi đầu vào thành mảng State
-    public void formatInput(String input) throws UnsupportedEncodingException {
-        byte[] myBytes = input.getBytes("UTF-8");
-        String hexaString = DatatypeConverter.printHexBinary(myBytes);
-        while (hexaString.length() % 32 != 0) {
-            hexaString += 0;
-            addInput++;
+    //====================================================================================================================================================================
+    // KIỂM TRA, BIẾN ĐỔI CÁC THAM SỐ ĐẦU VÀO VÀ KẾT QUẢ ĐẦU RA 
+    // Biến đổi chuỗi số Hexa đầu vào thành một mảng hexa
+    public int[] formatToHexaMatrix(String hexaString) throws UnsupportedEncodingException {
+        int resultLength = hexaString.length() / 8;
+        int[] result = new int[resultLength];
+        int byte1, byte2, byte3, byte4;
+        for (int i = 0; i < resultLength; i++) {
+            byte1 = Integer.valueOf(hexaString.substring(i * 8, i * 8 + 2), 16);
+            byte2 = Integer.valueOf(hexaString.substring(i * 8 + 2, i * 8 + 4), 16);
+            byte3 = Integer.valueOf(hexaString.substring(i * 8 + 4, i * 8 + 6), 16);
+            byte4 = Integer.valueOf(hexaString.substring(i * 8 + 6, i * 8 + 8), 16);
+            result[i] = (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
         }
-        System.out.println(input);
-        System.out.println(hexaString);
-        System.out.println(hexaString.length());
-        this.input = formatToHexaMatrix(hexaString);
-        System.out.println(input.length());
+        return result;
+    }
 
+    // Biến đổi chuỗi đầu vào thành mảng Input
+    public void formatInput(String input, String typeInput) throws UnsupportedEncodingException {
+        this.input = new int[99999999];
+        String hexaString = "";
+        boolean flag = false;
+        if (typeInput.equals("UTF-8")) {
+            while (!flag) {
+                byte[] myBytes = input.getBytes("UTF-8");
+                hexaString = DatatypeConverter.printHexBinary(myBytes);
+                if (hexaString.length() % 32 != 0) {
+                    input += " ";
+                } else {
+                    flag = true;
+                }
+            }
+        } else if (typeInput.equals("Hexa")) {
+            this.inputLength = input.length();
+            while (!flag) {
+                hexaString = input.replaceAll(" ", "");
+                if (hexaString.length() % 32 != 0) {
+                    input += 0;
+                } else {
+                    flag = true;
+                }
+            }
+        }
+        this.input = formatToHexaMatrix(hexaString);
     }
 
     // Kiểm tra độ dài khóa
-    public boolean checkKeyLength(String key) {
-        switch (key.length()) {
-            case 16:
-                Nk = 4;
-                Nr = 10;
-                break;
-            case 24:
-                Nk = 6;
-                Nr = 12;
-                break;
-            case 32:
-                Nk = 8;
-                Nr = 14;
-                break;
-            default:
-                return false;
+    public boolean checkKeyLength(String key, String type) {
+        if (type.equals("128 bits") && (key.length() == 16)) {
+            Nk = 4;
+            Nr = 10;
+        } else if (type.equals("192 bits") && (key.length() == 24)) {
+            Nk = 6;
+            Nr = 12;
+        } else if (type.equals("256 bits") && (key.length() == 32)) {
+            Nk = 8;
+            Nr = 14;
+        } else {
+            return false;
         }
         return true;
     }
 
     // Biến đổi khóa thành mảng
     public void formatkey(String key) throws UnsupportedEncodingException {
-        if (checkKeyLength(key)) {
-            byte[] myBytes = key.getBytes("UTF-8");
-            String hexaString = DatatypeConverter.printHexBinary(myBytes);
-            this.key = formatToHexaMatrix(hexaString);
-        } else {
-            System.out.println("Độ dài key nhập vào không hợp lệ !");
+        byte[] myBytes = key.getBytes("UTF-8");
+        String hexaString = DatatypeConverter.printHexBinary(myBytes);
+        this.key = formatToHexaMatrix(hexaString);
+    }
+
+    // Lấy ra mảng byte trong chuỗi hexa
+    private static byte[] fromHex(String hex) {
+        byte[] binary = new byte[hex.length() / 2];
+        for (int i = 0; i < binary.length; i++) {
+            binary[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
         }
+        return binary;
+    }
+
+    // Biến đổi chuỗi đầu ra
+    public String formatOutput(String typeOutput, Boolean decrption) throws UnsupportedEncodingException {
+        if (typeOutput.equals("UTF-8")) {
+            this.output = this.output.replaceAll(" ", "");
+            byte[] bytes = fromHex(this.output);
+            this.output = new String(bytes, StandardCharsets.UTF_8);
+            if (decrption) {
+                this.output = this.output.trim();
+            }
+        } else if (decrption && typeOutput.equals("Hexa")) {
+            this.output = this.output.substring(0, this.inputLength);
+        }
+        return this.output;
     }
 
     //====================================================================================================================================================================
@@ -226,7 +263,7 @@ public class AES_Controller {
     // Hàm nhân 2 với byte
     public int nhan2(int w) {
         int result = w << 1;
-        if (result > 256) {
+        if (result >= 256) {
             result = result ^ 0x11b;
         }
         return result & 0xFF;
@@ -265,8 +302,7 @@ public class AES_Controller {
 
     public void showMatrix(int[] w) {
         for (int i = 0; i < w.length; i++) {
-            showHexaNumber(w[i]);
-            System.out.println("");
+            System.out.println(showHexaNumber(w[i]));
         }
     }
 
@@ -280,52 +316,38 @@ public class AES_Controller {
         return result;
     }
 
-//    public int[] encrptionAES(int[] state, int[] key) {
-//        int i, j;
-//        for (i = 0; i < input.length; i++) {
-//            System.out.println(Integer.toHexString(input[i]));
-//        }
-//
-//        for (i = 0; i < input.length; i += 4) {
-//            state[0] = input[i];
-//            state[1] = input[i + 1];
-//            state[2] = input[i + 2];
-//            state[3] = input[i + 3];
-//
-//            state = addRoundKey(state, getKey(key, 0));
-//            for (j = 1; j <= Nr - 1; j++) {
-//                state = subBytes(state);
-//                state = shiftrow(state);
-//                state = mixCollumn(state);
-//                state = addRoundKey(state, getKey(key, j));
-//            }
-//            state = subBytes(state);
-//            state = shiftrow(state);
-//            state = addRoundKey(state, getKey(key, Nr));
-//            for (j = 0; j < 4; j++) {
-//                this.output += Integer.toHexString(state[j]) + " ";
-//            }
-//        }
-//        return output;
-//    }
-    public int[] EncrptionAES(int[] state, int[] key) {
-        // Vòng đầu tiên
-        state = addRoundKey(state, getKey(key, 0));
-        // Vòng thứ 1 đến thứ 9
-        int i;
-        for (i = 1; i <= 9; i++) {
+    public String encrptionAES() throws UnsupportedEncodingException {
+        int i, j;
+        this.output = "";
+
+        for (i = 0; i < input.length; i += 4) {
+            state[0] = input[i];
+            state[1] = input[i + 1];
+            state[2] = input[i + 2];
+            state[3] = input[i + 3];
+
+            state = addRoundKey(state, getKey(key, 0));
+
+            for (j = 1; j <= Nr - 1; j++) {
+                state = subBytes(state);
+                state = shiftrow(state);
+                state = mixCollumn(state);
+                state = addRoundKey(state, getKey(key, j));
+            }
+
             state = subBytes(state);
             state = shiftrow(state);
-            state = mixCollumn(state);
-            state = addRoundKey(state, getKey(key, i));
+            state = addRoundKey(state, getKey(key, Nr));
+
+//            System.out.println("");
+//            System.out.println("Output:");
+//            showMatrix(state);
+            for (j = 0; j < 4; j++) {
+                this.output += showHexaNumber(state[j]);
+            }
         }
-        // Vòng thứ 10
-        state = subBytes(state);
-        state = shiftrow(state);
-        state = addRoundKey(state, getKey(key, 10));
-        System.out.println("");
-        showMatrix(state);
-        return state;
+
+        return output.toUpperCase();
     }
 
     //====================================================================================================================================================================
@@ -472,21 +494,32 @@ public class AES_Controller {
         return result;
     }
 
-    public int[] decryptionAES(int[] input, int[] key) {
-        int[] w = keyExpansion(key);
-        int[] state = addRoundKey(input, invertGetKey(w, 0));
-        int i;
-        for (i = 1; i <= 9; i++) {
+    public String decryptionAES() {
+        int i, j;
+        this.output = "";
+
+        for (i = 0; i < input.length; i += 4) {
+            state[0] = input[i];
+            state[1] = input[i + 1];
+            state[2] = input[i + 2];
+            state[3] = input[i + 3];
+
+            state = addRoundKey(state, invertGetKey(key, 0));
+
+            for (j = 1; j <= Nr - 1; j++) {
+                state = invertShiftrow(state);
+                state = invertSubBytes(state);
+                state = addRoundKey(state, invertGetKey(key, j));
+                state = invertMixCollumn(state);
+            }
             state = invertShiftrow(state);
             state = invertSubBytes(state);
-            state = addRoundKey(state, invertGetKey(key, i));
-            state = invertMixCollumn(state);
+            state = addRoundKey(state, invertGetKey(key, Nr));
+
+            for (j = 0; j < 4; j++) {
+                this.output += showHexaNumber(state[j]);
+            }
         }
-        state = invertShiftrow(state);
-        state = invertSubBytes(state);
-        state = addRoundKey(state, invertGetKey(key, 10));
-        System.out.println("");
-        showMatrix(state);
-        return state;
+        return output.toUpperCase();
     }
 }
