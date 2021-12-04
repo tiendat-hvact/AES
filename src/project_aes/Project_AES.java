@@ -29,8 +29,7 @@ public class Project_AES {
     /**
      * @param args the command line arguments
      */
-
-    public static void main(String[] args) throws UnsupportedEncodingException {
+    public static void main(String[] args) {
         AES_Form form = new AES_Form();
         form.main();
     }

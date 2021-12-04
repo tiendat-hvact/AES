@@ -320,28 +320,76 @@ public class AES_Controller {
         int i, j;
         this.output = "";
 
+//        System.out.println("====== MÃ HÓA ======");
         for (i = 0; i < input.length; i += 4) {
             state[0] = input[i];
             state[1] = input[i + 1];
             state[2] = input[i + 2];
             state[3] = input[i + 3];
 
+//            System.out.println("");
+//            System.out.println("Input:");
+//            showMatrix(state);
+
+//            System.out.println("");
+//            System.out.println("Key:");
+//            showMatrix(getKey(key, 0));
+
             state = addRoundKey(state, getKey(key, 0));
+
+//            System.out.println("");
+//            System.out.println("Vòng 1:");
+//            showMatrix(state);
 
             for (j = 1; j <= Nr - 1; j++) {
                 state = subBytes(state);
+
+//                System.out.println("");
+//                System.out.println("SubBytes:");
+//                showMatrix(state);
+
                 state = shiftrow(state);
+
+//                System.out.println("");
+//                System.out.println("Shiftrow:");
+//                showMatrix(state);
+
                 state = mixCollumn(state);
+
+//                System.out.println("");
+//                System.out.println("MixCollumn:");
+//                showMatrix(state);
+
+//                System.out.println("");
+//                System.out.println("Key:");
+//                showMatrix(getKey(key, j));
+
                 state = addRoundKey(state, getKey(key, j));
+
+//                System.out.println("");
+//                System.out.println("Vòng " + (j + 1));
+//                showMatrix(state);
+
             }
 
             state = subBytes(state);
+
+//            System.out.println("");
+//            System.out.println("SubBytes");
+//            showMatrix(state);
+
             state = shiftrow(state);
+
+//            System.out.println("");
+//            System.out.println("Shiftrow:");
+//            showMatrix(state);
+
             state = addRoundKey(state, getKey(key, Nr));
 
 //            System.out.println("");
 //            System.out.println("Output:");
 //            showMatrix(state);
+
             for (j = 0; j < 4; j++) {
                 this.output += showHexaNumber(state[j]);
             }
@@ -497,24 +545,75 @@ public class AES_Controller {
     public String decryptionAES() {
         int i, j;
         this.output = "";
-
+        
+//        System.out.println("====== GIẢI MÃ ======");
         for (i = 0; i < input.length; i += 4) {
             state[0] = input[i];
             state[1] = input[i + 1];
             state[2] = input[i + 2];
             state[3] = input[i + 3];
 
+//            System.out.println("");
+//            System.out.println("Input:");
+//            showMatrix(state);
+
+//            System.out.println("");
+//            System.out.println("Key:");
+//            showMatrix(invertGetKey(key, 0));
+
             state = addRoundKey(state, invertGetKey(key, 0));
+
+            System.out.println("");
+            System.out.println("Vòng 1:");
+            showMatrix(state);
 
             for (j = 1; j <= Nr - 1; j++) {
                 state = invertShiftrow(state);
+
+//                System.out.println("");
+//                System.out.println("InvertShiftrow:");
+//                showMatrix(state);
+
                 state = invertSubBytes(state);
+
+//                System.out.println("");
+//                System.out.println("InvertSubBytes:");
+//                showMatrix(state);
+
+//                System.out.println("");
+//                System.out.println("Key:");
+//                showMatrix(invertGetKey(key, j));
+
                 state = addRoundKey(state, invertGetKey(key, j));
+
+//                System.out.println("");
+//                System.out.println("AddRoundKey");
+//                showMatrix(state);
+
                 state = invertMixCollumn(state);
+
+//                System.out.println("");
+//                System.out.println("Vòng " + (j + 1));
+//                showMatrix(state);
+
             }
             state = invertShiftrow(state);
+
+//            System.out.println("");
+//            System.out.println("InvertShiftrow:");
+//            showMatrix(state);
+
             state = invertSubBytes(state);
+
+//            System.out.println("");
+//            System.out.println("InvertSubBytes:");
+//            showMatrix(state);
+
             state = addRoundKey(state, invertGetKey(key, Nr));
+
+//            System.out.println("");
+//            System.out.println("Output:");
+//            showMatrix(state);
 
             for (j = 0; j < 4; j++) {
                 this.output += showHexaNumber(state[j]);
