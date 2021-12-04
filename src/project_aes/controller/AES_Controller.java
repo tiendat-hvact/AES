@@ -18,9 +18,9 @@ public class AES_Controller {
     //Số cột chứa một trạng thái trong AES
     private int Nb = 4;
     // Số vòng lặp trong AES Cipher
-    private int Nr = 10;
+    private int Nr = 0;
     // Số khóa vòng vào từng vòng mã hóa và giải mã
-    private int Nk = 4;
+    private int Nk = 0;
 
     // Mảng lưu trữ đầu vào
     private int[] input;
@@ -316,7 +316,7 @@ public class AES_Controller {
         return result;
     }
 
-    public String encrptionAES() throws UnsupportedEncodingException {
+    public String encrptionAES() {
         int i, j;
         this.output = "";
 
@@ -563,9 +563,9 @@ public class AES_Controller {
 
             state = addRoundKey(state, invertGetKey(key, 0));
 
-            System.out.println("");
-            System.out.println("Vòng 1:");
-            showMatrix(state);
+//            System.out.println("");
+//            System.out.println("Vòng 1:");
+//            showMatrix(state);
 
             for (j = 1; j <= Nr - 1; j++) {
                 state = invertShiftrow(state);
