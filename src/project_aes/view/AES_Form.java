@@ -6,9 +6,11 @@
 package project_aes.view;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.xml.bind.DatatypeConverter;
 import project_aes.controller.AES_Controller;
 
 /**
@@ -52,7 +54,7 @@ public class AES_Form extends javax.swing.JFrame {
         decrytedTxtArea = new javax.swing.JTextArea();
         decrytedBtn = new javax.swing.JButton();
         encrytedBtn = new javax.swing.JButton();
-        keyTypeCbx = new javax.swing.JComboBox<>();
+        keyLengthCbx = new javax.swing.JComboBox<>();
         decTypeCbx = new javax.swing.JComboBox<>();
         encTypeCbx = new javax.swing.JComboBox<>();
         jLabel3 = new javax.swing.JLabel();
@@ -60,14 +62,15 @@ public class AES_Form extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
-        jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
-        timeTxt = new javax.swing.JTextField();
+        keyTypeCbx = new javax.swing.JComboBox<>();
+        jLabel18 = new javax.swing.JLabel();
+        keyLengthLabel = new javax.swing.JLabel();
+        timeRunningLabel = new javax.swing.JLabel();
+        jLabel16 = new javax.swing.JLabel();
 
         jLabel2.setText("jLabel2");
 
@@ -80,6 +83,12 @@ public class AES_Form extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setText("Key");
+
+        keyTxt.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                keyTxtFocusLost(evt);
+            }
+        });
 
         encrytedTxtArea.setColumns(20);
         encrytedTxtArea.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
@@ -109,9 +118,9 @@ public class AES_Form extends javax.swing.JFrame {
             }
         });
 
-        keyTypeCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "128 bits", "192 bits", "256 bits" }));
+        keyLengthCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "128 bits", "192 bits", "256 bits" }));
 
-        decTypeCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Hexa", "UTF-8" }));
+        decTypeCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Base64", "Hexa" }));
 
         encTypeCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "UTF-8", "Hexa" }));
 
@@ -127,13 +136,6 @@ public class AES_Form extends javax.swing.JFrame {
 
         jLabel8.setText("Khóa 256 bits - 32 ký tự");
 
-        jLabel9.setForeground(new java.awt.Color(255, 51, 51));
-        jLabel9.setText("Có 2 dạng ký tự được sử dụng trong chương trình:");
-
-        jLabel10.setText("UTF-8 - Ký tự sẽ được mã hóa theo UTF-8");
-
-        jLabel11.setText("Hexa  - Ký tự sẽ ở dạng số Hexa");
-
         jLabel12.setForeground(new java.awt.Color(255, 51, 51));
         jLabel12.setText("Yêu cầu nhập đúng định dạng đầu vào với dạng ký tự đã chọn:");
 
@@ -141,7 +143,24 @@ public class AES_Form extends javax.swing.JFrame {
 
         jLabel14.setText("Hexa  - Chỉ được phép nhập các số Hexa, khoảng trắng");
 
-        jLabel15.setText("Thời gian chạy");
+        jLabel15.setForeground(new java.awt.Color(255, 0, 0));
+        jLabel15.setText("Độ dài khóa:");
+
+        keyTypeCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "UTF-8", "Hexa" }));
+        keyTypeCbx.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                keyTypeCbxItemStateChanged(evt);
+            }
+        });
+
+        jLabel18.setForeground(new java.awt.Color(255, 0, 0));
+        jLabel18.setText("Thời gian chạy:");
+
+        keyLengthLabel.setText("0 ký tự");
+
+        timeRunningLabel.setText("0 ms");
+
+        jLabel16.setText("UTF-8 - Có thể nhập kí tự đặc biệt, số, chữ không dấu");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -149,44 +168,46 @@ public class AES_Form extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 30, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(decTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(decrytedBtn))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 514, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(encTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(encrytedBtn))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(18, 18, 18)
+                                .addComponent(keyTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 263, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(keyLengthCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(18, 18, 18)
+                        .addComponent(keyTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
+                        .addComponent(jLabel18)
                         .addGap(18, 18, 18)
-                        .addComponent(keyTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 362, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(keyTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(encTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(encrytedBtn))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                            .addComponent(decTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(18, 18, 18)
-                            .addComponent(decrytedBtn))
-                        .addComponent(jScrollPane1)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 514, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(30, 30, 30)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(timeRunningLabel))
                     .addComponent(jLabel8)
-                    .addComponent(jLabel9)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jLabel6)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel7))
-                        .addComponent(jLabel4))
-                    .addComponent(jLabel11)
                     .addComponent(jLabel12)
                     .addComponent(jLabel13)
                     .addComponent(jLabel14)
+                    .addComponent(jLabel6)
+                    .addComponent(jLabel4)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel15)
                         .addGap(18, 18, 18)
-                        .addComponent(timeTxt)))
-                .addGap(30, 30, 30))
+                        .addComponent(keyLengthLabel))
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel16))
+                .addGap(39, 39, 39))
             .addGroup(layout.createSequentialGroup()
                 .addGap(59, 59, 59)
                 .addComponent(jLabel3)
@@ -194,39 +215,25 @@ public class AES_Form extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addGap(30, 30, 30)
                 .addComponent(jLabel3)
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(keyLengthCbx, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1)
+                        .addComponent(keyTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(keyTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel15)
+                        .addComponent(keyLengthLabel)))
+                .addGap(30, 30, 30)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(keyTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(keyTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(29, 29, 29)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(encTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(encrytedBtn)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel6)
-                            .addComponent(jLabel7))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel8)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel9)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel10)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel11)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
+                            .addComponent(encrytedBtn))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(30, 30, 30)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(decrytedBtn)
@@ -234,17 +241,28 @@ public class AES_Form extends javax.swing.JFrame {
                         .addGap(0, 0, 0)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(26, 26, 26)
+                                .addComponent(jLabel6)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel8)
+                        .addGap(30, 30, 30)
                         .addComponent(jLabel12)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel13)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel16)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel14)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(22, 22, 22)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel15)
-                            .addComponent(timeTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(31, Short.MAX_VALUE))
+                            .addComponent(jLabel18)
+                            .addComponent(timeRunningLabel))))
+                .addContainerGap(30, Short.MAX_VALUE))
         );
 
         pack();
@@ -252,14 +270,12 @@ public class AES_Form extends javax.swing.JFrame {
 
     private void encrytedBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encrytedBtnActionPerformed
         Boolean check = true;
-        if (!this.aesc.checkKeyLength(keyTxt.getText(), keyTypeCbx.getSelectedItem().toString())) {
+        if (!this.aesc.checkKeyLength(keyTxt.getText(), keyLengthCbx.getSelectedItem().toString(), keyTypeCbx.getSelectedItem().toString())) {
             JOptionPane.showMessageDialog(this, "Độ dài khóa nhập vào không hợp lệ", "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
             check = false;
         } else if (encTypeCbx.getSelectedItem().toString().equals("Hexa")) {
-            String text = encrytedTxtArea.getText().replaceAll(" ", "");
-            String pattern = "^[A-Fa-f0-9]+$";
-            check = text.matches(pattern);
-            if (!check) {
+            String input = encrytedTxtArea.getText().replaceAll(" ", "");
+            if (!input.matches("^[A-Fa-f0-9]+$")) {
                 JOptionPane.showMessageDialog(this, "Chuỗi nhập vào không hợp lệ", "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
                 check = false;
             }
@@ -267,13 +283,13 @@ public class AES_Form extends javax.swing.JFrame {
         if (check) {
             try {
                 startTime = System.currentTimeMillis();
-                this.aesc.formatkey(keyTxt.getText());
+                this.aesc.formatkey(keyTxt.getText(), keyTypeCbx.getSelectedItem().toString());
                 this.aesc.formatInput(encrytedTxtArea.getText(), encTypeCbx.getSelectedItem().toString());
                 this.aesc.encrptionAES();
-                String formatOutput = this.aesc.formatOutput(decTypeCbx.getSelectedItem().toString(), false);
+                String formatOutput = this.aesc.formatOutput(decTypeCbx.getSelectedItem().toString());
                 endTime = System.currentTimeMillis();
-                decrytedTxtArea.setText(formatOutput.toUpperCase());
-                timeTxt.setText((endTime - startTime) + " ms");
+                decrytedTxtArea.setText(formatOutput);
+                timeRunningLabel.setText((endTime - startTime) + " ms");
             } catch (UnsupportedEncodingException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
             }
@@ -282,33 +298,57 @@ public class AES_Form extends javax.swing.JFrame {
 
     private void decrytedBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decrytedBtnActionPerformed
         Boolean check = true;
-        if (!this.aesc.checkKeyLength(keyTxt.getText(), keyTypeCbx.getSelectedItem().toString())) {
+        if (!this.aesc.checkKeyLength(keyTxt.getText(), keyLengthCbx.getSelectedItem().toString(), keyTypeCbx.getSelectedItem().toString())) {
             JOptionPane.showMessageDialog(this, "Độ dài khóa nhập vào không hợp lệ", "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
             check = false;
         } else if (decTypeCbx.getSelectedItem().toString().equals("Hexa")) {
-            String text = decrytedTxtArea.getText().replaceAll(" ", "");
-            String pattern = "^[A-Fa-f0-9]+$";
-            check = text.matches(pattern);
-            if (!check) {
+            String input = decrytedTxtArea.getText().replaceAll(" ", "");
+            if (!input.matches("^[A-Fa-f0-9]+$") || (input.length() % 32 != 0)) {
+                JOptionPane.showMessageDialog(this, "Chuỗi nhập vào không hợp lệ", "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
+                check = false;
+            }
+        } else if (decTypeCbx.getSelectedItem().toString().equals("Base64")) {
+            String input = decrytedTxtArea.getText();
+            input = DatatypeConverter.printHexBinary(Base64.getDecoder().decode(input));
+            if (input.length() % 16 != 0) {
                 JOptionPane.showMessageDialog(this, "Chuỗi nhập vào không hợp lệ", "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
                 check = false;
             }
         }
+
         if (check) {
             try {
                 startTime = System.currentTimeMillis();
-                this.aesc.formatkey(keyTxt.getText());
+                this.aesc.formatkey(keyTxt.getText(), keyTypeCbx.getSelectedItem().toString());
                 this.aesc.formatInput(decrytedTxtArea.getText(), decTypeCbx.getSelectedItem().toString());
                 this.aesc.decryptionAES();
-                String formatOutput = this.aesc.formatOutput(encTypeCbx.getSelectedItem().toString(), true);
+                String formatOutput = this.aesc.formatOutput(encTypeCbx.getSelectedItem().toString());
                 endTime = System.currentTimeMillis();
                 encrytedTxtArea.setText(formatOutput);
-                timeTxt.setText((endTime - startTime) + " ms");
+                timeRunningLabel.setText((endTime - startTime) + " ms");
             } catch (UnsupportedEncodingException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
             }
         }
     }//GEN-LAST:event_decrytedBtnActionPerformed
+
+    private void keyTxtFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_keyTxtFocusLost
+        int length = keyTxt.getText().length();
+        if (keyTypeCbx.getSelectedItem().toString().equals("UTF-8")) {
+            keyLengthLabel.setText(length + " ký tự");
+        } else {
+            keyLengthLabel.setText((length * 4) + " bits");
+        }
+    }//GEN-LAST:event_keyTxtFocusLost
+
+    private void keyTypeCbxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_keyTypeCbxItemStateChanged
+        int length = keyTxt.getText().length();
+        if (keyTypeCbx.getSelectedItem().toString().equals("UTF-8")) {
+            keyLengthLabel.setText(length + " ký tự");
+        } else {
+            keyLengthLabel.setText((length * 4) + " bits");
+        }
+    }//GEN-LAST:event_keyTypeCbxItemStateChanged
 
     public static void main() {
         /* Set the Nimbus look and feel */
@@ -344,12 +384,12 @@ public class AES_Form extends javax.swing.JFrame {
     private javax.swing.JButton encrytedBtn;
     private javax.swing.JTextArea encrytedTxtArea;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -357,13 +397,14 @@ public class AES_Form extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTextArea jTextArea3;
+    private javax.swing.JComboBox<String> keyLengthCbx;
+    private javax.swing.JLabel keyLengthLabel;
     private javax.swing.JTextField keyTxt;
     private javax.swing.JComboBox<String> keyTypeCbx;
-    private javax.swing.JTextField timeTxt;
+    private javax.swing.JLabel timeRunningLabel;
     // End of variables declaration//GEN-END:variables
 }
