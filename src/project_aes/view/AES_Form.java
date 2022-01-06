@@ -7,8 +7,6 @@ package project_aes.view;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.xml.bind.DatatypeConverter;
 import project_aes.controller.AES_Controller;
@@ -69,7 +67,7 @@ public class AES_Form extends javax.swing.JFrame {
         keyTypeCbx = new javax.swing.JComboBox<>();
         jLabel18 = new javax.swing.JLabel();
         keyLengthLabel = new javax.swing.JLabel();
-        timeRunningLabel = new javax.swing.JLabel();
+        timeRunningEncLabel = new javax.swing.JLabel();
         jLabel16 = new javax.swing.JLabel();
         jScrollPane4 = new javax.swing.JScrollPane();
         inputEncrytedTxtArea = new javax.swing.JTextArea();
@@ -77,6 +75,8 @@ public class AES_Form extends javax.swing.JFrame {
         outputDecrytedTxtArea = new javax.swing.JTextArea();
         outputDecTypeCbx = new javax.swing.JComboBox<>();
         inputDecTypeCbx = new javax.swing.JComboBox<>();
+        jLabel19 = new javax.swing.JLabel();
+        timeRunningDecLabel = new javax.swing.JLabel();
 
         jLabel2.setText("jLabel2");
 
@@ -166,7 +166,7 @@ public class AES_Form extends javax.swing.JFrame {
 
         keyLengthLabel.setText("0 ký tự");
 
-        timeRunningLabel.setText("0 ms");
+        timeRunningEncLabel.setText("0 ms");
 
         jLabel16.setText("Base64 - Có thể nhập kí tự đặc biệt, số, chữ không dấu");
 
@@ -189,6 +189,11 @@ public class AES_Form extends javax.swing.JFrame {
         outputDecTypeCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "UTF-8", "Hexa" }));
 
         inputDecTypeCbx.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Base64", "Hexa" }));
+
+        jLabel19.setForeground(new java.awt.Color(255, 0, 0));
+        jLabel19.setText("Thời gian chạy:");
+
+        timeRunningDecLabel.setText("0 ms");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -221,37 +226,38 @@ public class AES_Form extends javax.swing.JFrame {
                                     .addComponent(jLabel13)
                                     .addComponent(jLabel14)
                                     .addComponent(jLabel16)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                            .addComponent(jLabel15)
-                                            .addGap(18, 18, 18)
-                                            .addComponent(keyLengthLabel)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(jLabel18)
-                                            .addGap(18, 18, 18)
-                                            .addComponent(timeRunningLabel))
-                                        .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.LEADING))))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel15)
                                         .addGap(18, 18, 18)
-                                        .addComponent(encrytedBtn))
-                                    .addComponent(inputEncTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(keyLengthLabel))
+                                    .addComponent(jLabel12)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(inputEncTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jLabel18)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(timeRunningEncLabel))
+                                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addComponent(encrytedBtn)
                                 .addGap(18, 18, 18)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(outputEncTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(inputDecTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(139, 139, 139))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(decrytedBtn)
-                                        .addGap(18, 18, 18)))
+                                        .addComponent(jLabel19)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(timeRunningDecLabel))
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(decrytedBtn)
+                                .addGap(18, 18, 18)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(outputDecTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE))))))
@@ -284,9 +290,7 @@ public class AES_Form extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel15)
-                            .addComponent(keyLengthLabel)
-                            .addComponent(jLabel18)
-                            .addComponent(timeRunningLabel))
+                            .addComponent(keyLengthLabel))
                         .addGap(30, 30, 30)
                         .addComponent(jLabel12)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -298,7 +302,10 @@ public class AES_Form extends javax.swing.JFrame {
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(inputEncTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(outputEncTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(outputEncTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel18)
+                        .addComponent(timeRunningEncLabel)))
                 .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -308,7 +315,11 @@ public class AES_Form extends javax.swing.JFrame {
                         .addComponent(encrytedBtn)))
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(outputDecTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(outputDecTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel19)
+                            .addComponent(timeRunningDecLabel)))
                     .addComponent(inputDecTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -316,7 +327,7 @@ public class AES_Form extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(30, Short.MAX_VALUE))
+                        .addContainerGap(32, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(decrytedBtn)
@@ -346,7 +357,7 @@ public class AES_Form extends javax.swing.JFrame {
                 this.aesc.encrptionAES();
                 outputEncrytedTxtArea.setText(this.aesc.formatOutput(outputEncTypeCbx.getSelectedItem().toString()));
                 endTime = System.currentTimeMillis();
-                timeRunningLabel.setText((endTime - startTime) + " ms");
+                timeRunningEncLabel.setText((endTime - startTime) + " ms");
             } catch (UnsupportedEncodingException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
             }
@@ -381,7 +392,7 @@ public class AES_Form extends javax.swing.JFrame {
                 this.aesc.decryptionAES();
                 outputDecrytedTxtArea.setText(this.aesc.formatOutput(outputDecTypeCbx.getSelectedItem().toString()));
                 endTime = System.currentTimeMillis();
-                timeRunningLabel.setText((endTime - startTime) + " ms");
+                timeRunningDecLabel.setText((endTime - startTime) + " ms");
             } catch (UnsupportedEncodingException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
             }
@@ -446,6 +457,7 @@ public class AES_Form extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -467,6 +479,7 @@ public class AES_Form extends javax.swing.JFrame {
     private javax.swing.JTextArea outputDecrytedTxtArea;
     private javax.swing.JComboBox<String> outputEncTypeCbx;
     private javax.swing.JTextArea outputEncrytedTxtArea;
-    private javax.swing.JLabel timeRunningLabel;
+    private javax.swing.JLabel timeRunningDecLabel;
+    private javax.swing.JLabel timeRunningEncLabel;
     // End of variables declaration//GEN-END:variables
 }
