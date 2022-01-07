@@ -166,7 +166,7 @@ public class AES_Form extends javax.swing.JFrame {
 
         keyLengthLabel.setText("0 ký tự");
 
-        timeRunningEncLabel.setText("0 ms");
+        timeRunningEncLabel.setText("0 ns");
 
         jLabel16.setText("Base64 - Có thể nhập kí tự đặc biệt, số, chữ không dấu");
 
@@ -193,7 +193,7 @@ public class AES_Form extends javax.swing.JFrame {
         jLabel19.setForeground(new java.awt.Color(255, 0, 0));
         jLabel19.setText("Thời gian chạy:");
 
-        timeRunningDecLabel.setText("0 ms");
+        timeRunningDecLabel.setText("0 ns");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -300,12 +300,13 @@ public class AES_Form extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel14)))
                 .addGap(30, 30, 30)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(inputEncTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(outputEncTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel18)
-                        .addComponent(timeRunningEncLabel)))
+                        .addComponent(timeRunningEncLabel))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(inputEncTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(outputEncTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -315,11 +316,11 @@ public class AES_Form extends javax.swing.JFrame {
                         .addComponent(encrytedBtn)))
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(outputDecTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel19)
-                            .addComponent(timeRunningDecLabel)))
+                            .addComponent(timeRunningDecLabel))
+                        .addComponent(outputDecTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(inputDecTypeCbx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -351,13 +352,13 @@ public class AES_Form extends javax.swing.JFrame {
         }
         if (check) {
             try {
-                startTime = System.currentTimeMillis();
+                startTime = System.nanoTime();
                 this.aesc.formatkey(keyTxt.getText(), keyTypeCbx.getSelectedItem().toString());
                 this.aesc.formatInput(inputEncrytedTxtArea.getText(), inputEncTypeCbx.getSelectedItem().toString());
                 this.aesc.encrptionAES();
                 outputEncrytedTxtArea.setText(this.aesc.formatOutput(outputEncTypeCbx.getSelectedItem().toString()));
-                endTime = System.currentTimeMillis();
-                timeRunningEncLabel.setText((endTime - startTime) + " ms");
+                endTime = System.nanoTime();
+                timeRunningEncLabel.setText((endTime - startTime) + " ns");
             } catch (UnsupportedEncodingException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
             }
@@ -386,13 +387,13 @@ public class AES_Form extends javax.swing.JFrame {
 
         if (check) {
             try {
-                startTime = System.currentTimeMillis();
+                startTime = System.nanoTime();
                 this.aesc.formatkey(keyTxt.getText(), keyTypeCbx.getSelectedItem().toString());
                 this.aesc.formatInput(inputDecrytedTxtArea.getText(), inputDecTypeCbx.getSelectedItem().toString());
                 this.aesc.decryptionAES();
                 outputDecrytedTxtArea.setText(this.aesc.formatOutput(outputDecTypeCbx.getSelectedItem().toString()));
-                endTime = System.currentTimeMillis();
-                timeRunningDecLabel.setText((endTime - startTime) + " ms");
+                endTime = System.nanoTime();
+                timeRunningDecLabel.setText((endTime - startTime) + " ns");
             } catch (UnsupportedEncodingException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Cảnh báo !", JOptionPane.WARNING_MESSAGE);
             }

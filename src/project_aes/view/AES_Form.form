@@ -178,12 +178,14 @@
                   </Group>
               </Group>
               <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="inputEncTypeCbx" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="outputEncTypeCbx" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Group type="103" alignment="3" groupAlignment="3" attributes="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                       <Component id="jLabel18" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="timeRunningEncLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="inputEncTypeCbx" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="outputEncTypeCbx" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
@@ -197,12 +199,12 @@
               </Group>
               <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="outputDecTypeCbx" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Group type="103" alignment="3" groupAlignment="3" attributes="0">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                           <Component id="jLabel19" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="timeRunningDecLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
+                      <Component id="outputDecTypeCbx" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="inputDecTypeCbx" min="-2" max="-2" attributes="0"/>
               </Group>
@@ -424,7 +426,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="timeRunningEncLabel">
       <Properties>
-        <Property name="text" type="java.lang.String" value="0 ms"/>
+        <Property name="text" type="java.lang.String" value="0 ns"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel16">
@@ -514,7 +516,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="timeRunningDecLabel">
       <Properties>
-        <Property name="text" type="java.lang.String" value="0 ms"/>
+        <Property name="text" type="java.lang.String" value="0 ns"/>
       </Properties>
     </Component>
   </SubComponents>
