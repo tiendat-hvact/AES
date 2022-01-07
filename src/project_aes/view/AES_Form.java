@@ -401,19 +401,21 @@ public class AES_Form extends javax.swing.JFrame {
     }//GEN-LAST:event_decrytedBtnActionPerformed
 
     private void keyTxtFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_keyTxtFocusLost
-        int length = keyTxt.getText().length();
         if (keyTypeCbx.getSelectedItem().toString().equals("UTF-8")) {
+            int length = keyTxt.getText().length();
             keyLengthLabel.setText(length + " ký tự");
         } else {
+            int length = keyTxt.getText().replaceAll(" ", "").length();
             keyLengthLabel.setText((length * 4) + " bits");
         }
     }//GEN-LAST:event_keyTxtFocusLost
 
     private void keyTypeCbxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_keyTypeCbxItemStateChanged
-        int length = keyTxt.getText().length();
         if (keyTypeCbx.getSelectedItem().toString().equals("UTF-8")) {
+            int length = keyTxt.getText().length();
             keyLengthLabel.setText(length + " ký tự");
         } else {
+            int length = keyTxt.getText().replaceAll(" ", "").length();
             keyLengthLabel.setText((length * 4) + " bits");
         }
     }//GEN-LAST:event_keyTypeCbxItemStateChanged
